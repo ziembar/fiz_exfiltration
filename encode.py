@@ -1,35 +1,23 @@
 import base64
-import wave
-
 import ggwave
 import pyaudio
 
-p = pyaudio.PyAudio()
+def string_to_sound(input_string):
+    waveform = ggwave.encode(input_string, protocolId=4, volume=100)
+    return waveform
 
-def b64_file(file_name):
-    with open(file_name, 'rb') as file:
-        return base64.b64encode(file.read()).decode()
+def play_sound(waveform):
+    p = pyaudio.PyAudio()
+    stream = p.open(format=pyaudio.paFloat32, channels=1, rate=48000, output=True, frames_per_buffer=4096)
+    stream.write(waveform, len(waveform) // 4)
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
 
-
-file_name = 'kura.png'
-encoded_data = b64_file(file_name)
-
-# generate audio waveform for string "hello python"
-waveform = ggwave.encode(encoded_data, protocolId=4, volume=100)
-
-
-
-output_file = 'output_waveform.wav'
-with wave.open(output_file, 'w') as wave_file:
-    wave_file.setnchannels(2)
-    wave_file.setsampwidth(1)  # 2 bytes for 16-bit audio
-    wave_file.setframerate(48000)
-    wave_file.writeframes(waveform)
-
-
-stream = p.open(format=pyaudio.paFloat32, channels=1, rate=48000, output=True, frames_per_buffer=4096)
-stream.write(waveform, len(waveform) // 4)
-stream.stop_stream()
-stream.close()
-
-p.terminate()
+if __name__ == "__main__":
+    try:
+        input_string = input("Enter a string to encode with sound: ")
+        waveform = string_to_sound(input_string)
+        play_sound(waveform)
+    except KeyboardInterrupt:
+        pass

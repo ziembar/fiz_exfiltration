@@ -14,9 +14,12 @@ try:
     while True:
         data = stream.read(1024, exception_on_overflow=False)
         res = ggwave.decode(instance, data)
-        if (not res is None):
+        if not res is None:
             try:
-                print(base64.b64decode(res.decode("utf-8")))
+                decoded_data = base64.b64decode(res.decode("utf-8"))
+                with open("output_file", 'wb') as file:
+                    file.write(decoded_data)
+
             except:
                 pass
 except KeyboardInterrupt:
